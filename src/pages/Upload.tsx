@@ -69,26 +69,7 @@ export default function Upload() {
         imageUrls,
       });
 
-      // Generate knowledge card
-      let knowledgeCardUrl: string | undefined;
-      try {
-        toast.info('正在生成知识卡片图片...');
-        const { data: cardResult, error: cardError } = await supabase.functions.invoke('generate-knowledge-card', {
-          body: {
-            subject: data.subject,
-            originalQuestion: data.text || '图片题目',
-            knowledgePoints: analysis.knowledgePoints,
-            cause: analysis.cause,
-          }
-        });
-
-        if (!cardError && cardResult?.imageUrl) {
-          knowledgeCardUrl = cardResult.imageUrl;
-          analysis.knowledgeCardUrl = knowledgeCardUrl;
-        }
-      } catch (cardGenError) {
-        console.error('Knowledge card generation error:', cardGenError);
-      }
+      // 知识卡片图片改为用户手动生成（避免上传后等待过久）
 
       // Save to database
       const { data: questionData, error: insertError } = await supabase
@@ -243,6 +224,7 @@ export default function Upload() {
               <AnalysisCard 
                 analysis={analyzedQuestion.analysis}
                 originalQuestion={analyzedQuestion.content}
+                subject={analyzedQuestion.subject}
               />
             )}
 

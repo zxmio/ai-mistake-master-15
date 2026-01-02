@@ -56,8 +56,30 @@ export function useStreamingAnalysis() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let fullContent = '';
+      let displayContent = '';
+      let jsonContent = '';
       let textBuffer = '';
+
+      const extractJsonText = (text: string) => {
+        let cleanedText = text.trim();
+
+        // Handle ```json ... ``` format
+        if (cleanedText.startsWith('```')) {
+          cleanedText = cleanedText.replace(/^```(?:json)?\s*\n?/, '');
+          cleanedText = cleanedText.replace(/\n?```\s*$/, '');
+        }
+
+        cleanedText = cleanedText.trim();
+
+        // Robust: pick the outermost JSON object in case there is leading/trailing chatter
+        const start = cleanedText.indexOf('{');
+        const end = cleanedText.lastIndexOf('}');
+        if (start !== -1 && end !== -1 && end > start) {
+          return cleanedText.slice(start, end + 1);
+        }
+
+        return cleanedText;
+      };
 
       while (true) {
         const { done, value } = await reader.read();
@@ -80,13 +102,23 @@ export function useStreamingAnalysis() {
 
           try {
             const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-            if (content) {
-              fullContent += content;
+            const delta = parsed.choices?.[0]?.delta ?? {};
+            const content = delta.content as string | undefined;
+            const reasoning = delta.reasoning as string | undefined;
+
+            // UI 实时展示：优先展示 content，否则展示 reasoning（避免空屏）
+            const displayChunk = content || reasoning;
+            if (displayChunk) {
+              displayContent += displayChunk;
               setState(prev => ({
                 ...prev,
-                streamedContent: fullContent,
+                streamedContent: displayContent,
               }));
+            }
+
+            // 最终解析：只累计 content（避免把推理流混进 JSON）
+            if (content) {
+              jsonContent += content;
             }
           } catch {
             // Incomplete JSON, put it back
@@ -99,26 +131,19 @@ export function useStreamingAnalysis() {
       // Parse the final JSON
       let analysis: QuestionAnalysis;
       try {
-        let cleanedText = fullContent.trim();
-        
-        // Handle ```json ... ``` format
-        if (cleanedText.startsWith('```')) {
-          cleanedText = cleanedText.replace(/^```(?:json)?\s*\n?/, '');
-          cleanedText = cleanedText.replace(/\n?```\s*$/, '');
-        }
-        
-        cleanedText = cleanedText.trim();
-        const aiAnalysis = JSON.parse(cleanedText);
+        const raw = (jsonContent.trim() ? jsonContent : displayContent).trim();
+        const jsonText = extractJsonText(raw);
+        const aiAnalysis = JSON.parse(jsonText);
 
         analysis = {
           cause: aiAnalysis.cause,
           correctAnswer: aiAnalysis.correctAnswer,
-          knowledgePoints: aiAnalysis.knowledgePoints.map((kp: any) => ({
+          knowledgePoints: (aiAnalysis.knowledgePoints || []).map((kp: any) => ({
             title: kp.title,
             explanation: kp.explanation,
             examples: kp.examples || [],
           })),
-          similarQuestions: aiAnalysis.similarQuestions.map((sq: any, index: number) => ({
+          similarQuestions: (aiAnalysis.similarQuestions || []).map((sq: any, index: number) => ({
             id: `sq_${Date.now()}_${index}`,
             content: sq.question,
             difficulty: sq.difficulty === 'basic' ? 'easy' : sq.difficulty === 'advanced' ? 'hard' : 'medium',
@@ -126,7 +151,7 @@ export function useStreamingAnalysis() {
           })),
         };
       } catch (parseError) {
-        console.error('Failed to parse analysis:', fullContent);
+        console.error('Failed to parse analysis:', { jsonContent, displayContent });
         throw new Error('解析AI响应失败');
       }
 
