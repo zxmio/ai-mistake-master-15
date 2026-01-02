@@ -1,190 +1,37 @@
 import { useState } from "react";
-import {
-  AlertCircle,
-  CheckCircle2,
-  BookOpen,
+import { 
+  AlertCircle, 
+  CheckCircle2, 
+  BookOpen, 
   ListChecks,
   ChevronDown,
   ChevronUp,
-  Lightbulb,
-  ImageIcon,
-  Download,
-  Sparkles,
-  Loader2,
+  Lightbulb
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { QuestionAnalysis, SimilarQuestion, Subject } from "@/types";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { QuestionAnalysis, SimilarQuestion } from "@/types";
 
 interface AnalysisCardProps {
   analysis: QuestionAnalysis;
   originalQuestion: string;
-  subject: Subject;
 }
 
-export function AnalysisCard({ analysis, originalQuestion, subject }: AnalysisCardProps) {
+export function AnalysisCard({ analysis, originalQuestion }: AnalysisCardProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    card: true,
     cause: true,
     answer: true,
     knowledge: false,
     practice: false,
   });
 
-  const [cardUrl, setCardUrl] = useState<string | undefined>(analysis.knowledgeCardUrl);
-  const [isGeneratingCard, setIsGeneratingCard] = useState(false);
-
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const handleDownloadCard = () => {
-    if (cardUrl) {
-      const link = document.createElement('a');
-      link.href = cardUrl;
-      link.download = `knowledge-card-${Date.now()}.png`;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
-  const handleGenerateCard = async () => {
-    if (isGeneratingCard) return;
-
-    try {
-      setIsGeneratingCard(true);
-      toast.info('正在生成知识卡片图片...');
-
-      const { data, error } = await supabase.functions.invoke('generate-knowledge-card', {
-        body: {
-          subject,
-          originalQuestion,
-          knowledgePoints: analysis.knowledgePoints,
-          cause: analysis.cause,
-        },
-      });
-
-      if (error) {
-        console.error('Generate card error:', error);
-        throw new Error(error.message || '生成失败');
-      }
-
-      const imageUrl = (data as any)?.imageUrl as string | undefined;
-      if (!imageUrl) {
-        throw new Error('生成失败：未返回图片');
-      }
-
-      setCardUrl(imageUrl);
-      analysis.knowledgeCardUrl = imageUrl;
-      setExpandedSections(prev => ({ ...prev, card: true }));
-      toast.success('知识卡片已生成');
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : '生成知识卡片失败';
-      toast.error(msg);
-    } finally {
-      setIsGeneratingCard(false);
-    }
-  };
-
   return (
     <div className="space-y-4 animate-fade-in">
-      {/* AI Knowledge Card (manual generation) */}
-      <Card className="border-primary/30 shadow-glow overflow-hidden">
-        <CardHeader
-          className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors rounded-t-lg bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10"
-          onClick={() => toggleSection('card')}
-        >
-          <CardTitle className="flex items-center justify-between text-base">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary to-accent">
-                <Sparkles className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-semibold">
-                AI 知识卡片
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {cardUrl ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDownloadCard();
-                  }}
-                  className="h-8 px-2"
-                >
-                  <Download className="h-4 w-4 mr-1" />
-                  保存
-                </Button>
-              ) : (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleGenerateCard();
-                  }}
-                  disabled={isGeneratingCard}
-                  className="h-8"
-                >
-                  {isGeneratingCard ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      生成中
-                    </>
-                  ) : (
-                    <>
-                      <ImageIcon className="h-4 w-4 mr-1" />
-                      生成卡片
-                    </>
-                  )}
-                </Button>
-              )}
-
-              {expandedSections.card ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </div>
-          </CardTitle>
-        </CardHeader>
-
-        {expandedSections.card && (
-          <CardContent className="p-4 animate-slide-up">
-            {cardUrl ? (
-              <div className="relative rounded-xl overflow-hidden shadow-card">
-                <img
-                  src={cardUrl}
-                  alt="AI 生成的知识点讲解卡片"
-                  className="w-full h-auto object-contain max-h-[500px] bg-muted"
-                  loading="lazy"
-                />
-                <div className="absolute bottom-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-background/80 backdrop-blur-sm text-xs text-muted-foreground">
-                  <Sparkles className="h-3 w-3" />
-                  AI 生成
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-xl border border-border/50 bg-muted/30 p-6 text-center">
-                <div className="mx-auto w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
-                  <ImageIcon className="h-6 w-6 text-primary" />
-                </div>
-                <p className="text-sm text-foreground font-medium">还没有图片版知识卡片</p>
-                <p className="text-xs text-muted-foreground mt-1">点击右上角“生成卡片”即可生成（不会影响文字分析结果）</p>
-              </div>
-            )}
-          </CardContent>
-        )}
-      </Card>
-
       {/* Original Question */}
       <Card className="border-border/50 shadow-md">
         <CardHeader className="pb-3">

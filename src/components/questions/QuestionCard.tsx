@@ -96,8 +96,7 @@ export function QuestionCard({ question, onDelete }: QuestionCardProps) {
           {question.analysis && (
             <AnalysisCard 
               analysis={question.analysis} 
-              originalQuestion={question.content}
-              subject={question.subject}
+              originalQuestion={question.content} 
             />
           )}
         </DialogContent>

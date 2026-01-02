@@ -77,7 +77,7 @@ serve(async (req) => {
       userMessageContent = `学科：${subject}\n题目内容：${content}`;
     }
 
-    console.log('Analyzing question with streaming:', { 
+    console.log('Analyzing question:', { 
       subject, 
       contentLength: content?.length, 
       imageCount: imageUrls?.length,
@@ -96,7 +96,6 @@ serve(async (req) => {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessageContent }
         ],
-        stream: true,
       }),
     });
 
@@ -123,15 +122,37 @@ serve(async (req) => {
       );
     }
 
-    // Return streaming response
-    return new Response(response.body, {
-      headers: { 
-        ...corsHeaders, 
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    });
+    const data = await response.json();
+    const analysisText = data.choices?.[0]?.message?.content;
+
+    if (!analysisText) {
+      console.error('No content in AI response:', data);
+      return new Response(
+        JSON.stringify({ error: 'AI返回结果为空' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Parse the JSON response
+    let analysis;
+    try {
+      // Remove markdown code blocks if present
+      const cleanedText = analysisText.replace(/```json\n?|\n?```/g, '').trim();
+      analysis = JSON.parse(cleanedText);
+    } catch (parseError) {
+      console.error('Failed to parse AI response:', analysisText);
+      return new Response(
+        JSON.stringify({ error: '解析AI响应失败', rawResponse: analysisText }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Analysis completed successfully');
+
+    return new Response(
+      JSON.stringify({ analysis }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
 
   } catch (error) {
     console.error('Error in analyze-question function:', error);

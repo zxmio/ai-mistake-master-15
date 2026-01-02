@@ -2,6 +2,3 @@ project_id = "dzoqymcjqwrvnakstlmm"
 
 [functions.analyze-question]
 verify_jwt = false
-
-[functions.generate-knowledge-card]
-verify_jwt = false

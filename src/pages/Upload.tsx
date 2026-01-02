@@ -3,134 +3,29 @@ import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { UploadArea } from "@/components/upload/UploadArea";
 import { AnalysisCard } from "@/components/analysis/AnalysisCard";
-import { StreamingAnalysis } from "@/components/analysis/StreamingAnalysis";
-import { useStreamingAnalysis } from "@/hooks/useStreamingAnalysis";
+import { useQuestions } from "@/hooks/useQuestions";
 import { useAuth } from "@/hooks/useAuth";
-import { WrongQuestion, Subject, QuestionAnalysis } from "@/types";
+import { WrongQuestion, Subject } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Plus, CheckCircle2, LogIn, Upload as UploadIcon, Sparkles, Brain } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 export default function Upload() {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
-  const { isStreaming, streamedContent, analyzeQuestion, reset } = useStreamingAnalysis();
+  const { addQuestion, isAnalyzing } = useQuestions();
   const [analyzedQuestion, setAnalyzedQuestion] = useState<WrongQuestion | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-
-  // Upload images to storage and get URLs
-  const uploadImages = async (images: File[], userId: string): Promise<string[]> => {
-    const urls: string[] = [];
-    
-    for (const image of images) {
-      const fileExt = image.name.split('.').pop();
-      const fileName = `${userId}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-      
-      const { error } = await supabase.storage
-        .from('question-images')
-        .upload(fileName, image);
-      
-      if (error) {
-        console.error('Upload error:', error);
-        throw new Error('图片上传失败');
-      }
-      
-      const { data: { publicUrl } } = supabase.storage
-        .from('question-images')
-        .getPublicUrl(fileName);
-      
-      urls.push(publicUrl);
-    }
-    
-    return urls;
-  };
 
   const handleSubmit = async (data: { text?: string; images: File[]; subject: Subject }) => {
-    if (!user) {
-      toast.error('请先登录');
-      return;
-    }
-
-    setIsUploading(true);
-    reset();
-
     try {
-      // Upload images if any
-      let imageUrls: string[] = [];
-      if (data.images.length > 0) {
-        imageUrls = await uploadImages(data.images, user.id);
-      }
-
-      // Stream AI analysis
-      const analysis = await analyzeQuestion({
-        content: data.text || '',
-        subject: data.subject,
-        imageUrls,
-      });
-
-      // 知识卡片图片改为用户手动生成（避免上传后等待过久）
-
-      // Save to database
-      const { data: questionData, error: insertError } = await supabase
-        .from('wrong_questions')
-        .insert({
-          user_id: user.id,
-          subject: data.subject,
-          content: data.text || '图片题目',
-          image_urls: imageUrls,
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        console.error('Insert error:', insertError);
-        throw new Error('保存错题失败');
-      }
-
-      // Save analysis
-      await supabase
-        .from('question_analysis')
-        .insert([{
-          question_id: questionData.id,
-          cause: analysis.cause,
-          correct_answer: analysis.correctAnswer,
-          knowledge_points: analysis.knowledgePoints as any,
-          similar_questions: analysis.similarQuestions as any,
-        }]);
-
-      // Create flashcard
-      await supabase
-        .from('flashcards')
-        .insert({
-          user_id: user.id,
-          question_id: questionData.id,
-          front: data.text || '图片题目',
-          back: analysis.correctAnswer,
-          difficulty: 'medium',
-        });
-
-      const newQuestion: WrongQuestion = {
-        id: questionData.id,
-        content: data.text || '图片题目',
-        imageUrl: imageUrls[0],
-        subject: data.subject,
-        createdAt: new Date(questionData.created_at),
-        analysis,
-      };
-
-      setAnalyzedQuestion(newQuestion);
-      toast.success('AI分析完成！');
+      const question = await addQuestion(data);
+      setAnalyzedQuestion(question);
     } catch (error) {
-      console.error('Analysis error:', error);
-    } finally {
-      setIsUploading(false);
+      // Error already handled in useQuestions
     }
   };
 
   const handleNewQuestion = () => {
     setAnalyzedQuestion(null);
-    reset();
   };
 
   if (authLoading) {
@@ -177,9 +72,6 @@ export default function Upload() {
     );
   }
 
-  const showUploadArea = !analyzedQuestion && !isStreaming;
-  const showStreaming = isStreaming || (streamedContent && !analyzedQuestion);
-
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-10">
@@ -195,19 +87,11 @@ export default function Upload() {
           </p>
         </div>
 
-        {showUploadArea && (
+        {!analyzedQuestion ? (
           <div className="card-elevated p-8 md:p-10 animate-fade-in">
-            <UploadArea onSubmit={handleSubmit} isLoading={isUploading} />
+            <UploadArea onSubmit={handleSubmit} isLoading={isAnalyzing} />
           </div>
-        )}
-
-        {showStreaming && (
-          <div className="animate-fade-in">
-            <StreamingAnalysis content={streamedContent} isStreaming={isStreaming} />
-          </div>
-        )}
-
-        {analyzedQuestion && (
+        ) : (
           <div className="space-y-8 animate-fade-in">
             {/* Success banner */}
             <div className="flex items-center gap-4 p-5 rounded-2xl bg-success/10 border border-success/20">
@@ -224,7 +108,6 @@ export default function Upload() {
               <AnalysisCard 
                 analysis={analyzedQuestion.analysis}
                 originalQuestion={analyzedQuestion.content}
-                subject={analyzedQuestion.subject}
               />
             )}
 
