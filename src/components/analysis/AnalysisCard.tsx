@@ -6,10 +6,7 @@ import {
   ListChecks,
   ChevronDown,
   ChevronUp,
-  Lightbulb,
-  Sparkles,
-  Target,
-  Brain
+  Lightbulb
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,135 +31,99 @@ export function AnalysisCard({ analysis, originalQuestion }: AnalysisCardProps) 
   };
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Original Question */}
-      <Card className="border-border/30 shadow-card bg-card/80 backdrop-blur-sm overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-muted-foreground/30 to-muted-foreground/10" />
+      <Card className="border-border/50 shadow-md">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-3 text-base">
-            <div className="p-2 rounded-xl bg-muted/80">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <div className="p-1.5 rounded-lg bg-muted">
               <AlertCircle className="h-4 w-4 text-muted-foreground" />
             </div>
-            <span>原题回顾</span>
+            原题回顾
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-foreground leading-relaxed pl-11">{originalQuestion}</p>
+          <p className="text-sm text-foreground leading-relaxed">{originalQuestion}</p>
         </CardContent>
       </Card>
 
       {/* Error Analysis */}
-      <Card className="border-destructive/20 shadow-card bg-card/80 backdrop-blur-sm overflow-hidden group">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-destructive to-destructive/30" />
+      <Card className="border-destructive/20 shadow-md">
         <CardHeader 
-          className="pb-3 cursor-pointer hover:bg-destructive/5 transition-colors duration-300"
+          className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors rounded-t-lg"
           onClick={() => toggleSection('cause')}
         >
           <CardTitle className="flex items-center justify-between text-base">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-destructive/10 group-hover:bg-destructive/20 transition-colors duration-300">
-                <Target className="h-4 w-4 text-destructive" />
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-destructive/10">
+                <AlertCircle className="h-4 w-4 text-destructive" />
               </div>
-              <span>错误归因</span>
+              错误归因
             </div>
-            <div className={cn(
-              "p-1.5 rounded-lg bg-muted/50 transition-transform duration-300",
-              expandedSections.cause && "rotate-180"
-            )}>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </div>
+            {expandedSections.cause ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CardTitle>
         </CardHeader>
         {expandedSections.cause && (
-          <CardContent className="animate-fade-in pt-0">
-            <div className="pl-11 pr-4 py-3 rounded-xl bg-destructive/5 border border-destructive/10">
-              <p className="text-sm text-foreground leading-relaxed">{analysis.cause}</p>
-            </div>
+          <CardContent className="animate-slide-up">
+            <p className="text-sm text-foreground leading-relaxed">{analysis.cause}</p>
           </CardContent>
         )}
       </Card>
 
       {/* Correct Answer */}
-      <Card className="border-success/20 shadow-card bg-card/80 backdrop-blur-sm overflow-hidden group">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-success to-success/30" />
+      <Card className="border-success/20 shadow-md">
         <CardHeader 
-          className="pb-3 cursor-pointer hover:bg-success/5 transition-colors duration-300"
+          className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors rounded-t-lg"
           onClick={() => toggleSection('answer')}
         >
           <CardTitle className="flex items-center justify-between text-base">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-success/10 group-hover:bg-success/20 transition-colors duration-300">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-success/10">
                 <CheckCircle2 className="h-4 w-4 text-success" />
               </div>
-              <span>正确解答</span>
+              正确解答
             </div>
-            <div className={cn(
-              "p-1.5 rounded-lg bg-muted/50 transition-transform duration-300",
-              expandedSections.answer && "rotate-180"
-            )}>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </div>
+            {expandedSections.answer ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CardTitle>
         </CardHeader>
         {expandedSections.answer && (
-          <CardContent className="animate-fade-in pt-0">
-            <div className="pl-11 pr-4 py-3 rounded-xl bg-success/5 border border-success/10">
-              <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{analysis.correctAnswer}</p>
-            </div>
+          <CardContent className="animate-slide-up">
+            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{analysis.correctAnswer}</p>
           </CardContent>
         )}
       </Card>
 
       {/* Knowledge Points */}
-      <Card className="border-primary/20 shadow-card bg-card/80 backdrop-blur-sm overflow-hidden group">
-        <div className="absolute top-0 left-0 right-0 h-1 gradient-primary" />
+      <Card className="border-primary/20 shadow-md">
         <CardHeader 
-          className="pb-3 cursor-pointer hover:bg-primary/5 transition-colors duration-300"
+          className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors rounded-t-lg"
           onClick={() => toggleSection('knowledge')}
         >
           <CardTitle className="flex items-center justify-between text-base">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300">
-                <Brain className="h-4 w-4 text-primary" />
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-primary/10">
+                <BookOpen className="h-4 w-4 text-primary" />
               </div>
-              <span>知识点讲解</span>
-              <span className="text-xs text-muted-foreground font-normal">
-                ({analysis.knowledgePoints.length} 个知识点)
-              </span>
+              知识点讲解
             </div>
-            <div className={cn(
-              "p-1.5 rounded-lg bg-muted/50 transition-transform duration-300",
-              expandedSections.knowledge && "rotate-180"
-            )}>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </div>
+            {expandedSections.knowledge ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CardTitle>
         </CardHeader>
         {expandedSections.knowledge && (
-          <CardContent className="space-y-4 animate-fade-in pt-0">
+          <CardContent className="space-y-4 animate-slide-up">
             {analysis.knowledgePoints.map((point, index) => (
-              <div 
-                key={index} 
-                className="p-4 rounded-xl bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/10 hover:border-primary/20 transition-colors duration-300"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-1.5 rounded-lg gradient-primary">
-                    <Lightbulb className="h-3.5 w-3.5 text-primary-foreground" />
-                  </div>
-                  <h4 className="font-semibold text-foreground">{point.title}</h4>
+              <div key={index} className="p-4 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <Lightbulb className="h-4 w-4 text-warning" />
+                  <h4 className="font-medium text-foreground">{point.title}</h4>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed pl-9">{point.explanation}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{point.explanation}</p>
                 {point.examples && point.examples.length > 0 && (
-                  <div className="mt-4 ml-9 pl-4 border-l-2 border-primary/30">
-                    <p className="text-xs font-semibold text-primary mb-2 flex items-center gap-1.5">
-                      <Sparkles className="h-3 w-3" />
-                      示例
-                    </p>
-                    <div className="space-y-1.5">
-                      {point.examples.map((example, i) => (
-                        <p key={i} className="text-sm text-muted-foreground">{example}</p>
-                      ))}
-                    </div>
+                  <div className="mt-3 pl-4 border-l-2 border-primary/30">
+                    <p className="text-xs font-medium text-primary mb-1">例子：</p>
+                    {point.examples.map((example, i) => (
+                      <p key={i} className="text-sm text-muted-foreground">{example}</p>
+                    ))}
                   </div>
                 )}
               </div>
@@ -172,32 +133,23 @@ export function AnalysisCard({ analysis, originalQuestion }: AnalysisCardProps) 
       </Card>
 
       {/* Practice Questions */}
-      <Card className="border-accent/20 shadow-card bg-card/80 backdrop-blur-sm overflow-hidden group">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent to-accent/30" />
+      <Card className="border-accent/20 shadow-md">
         <CardHeader 
-          className="pb-3 cursor-pointer hover:bg-accent/5 transition-colors duration-300"
+          className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors rounded-t-lg"
           onClick={() => toggleSection('practice')}
         >
           <CardTitle className="flex items-center justify-between text-base">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-accent/10 group-hover:bg-accent/20 transition-colors duration-300">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-accent/10">
                 <ListChecks className="h-4 w-4 text-accent" />
               </div>
-              <span>同类练习题</span>
-              <span className="text-xs text-muted-foreground font-normal">
-                ({analysis.similarQuestions.length} 道题)
-              </span>
+              同类练习题
             </div>
-            <div className={cn(
-              "p-1.5 rounded-lg bg-muted/50 transition-transform duration-300",
-              expandedSections.practice && "rotate-180"
-            )}>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </div>
+            {expandedSections.practice ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </CardTitle>
         </CardHeader>
         {expandedSections.practice && (
-          <CardContent className="space-y-4 animate-fade-in pt-0">
+          <CardContent className="space-y-4 animate-slide-up">
             {analysis.similarQuestions.map((question, index) => (
               <PracticeQuestion key={question.id} question={question} index={index} />
             ))}
@@ -213,58 +165,44 @@ function PracticeQuestion({ question, index }: { question: SimilarQuestion; inde
   const [userAnswer, setUserAnswer] = useState("");
 
   const difficultyConfig = {
-    easy: { label: "基础", color: "bg-success/10 text-success border-success/30", gradient: "from-success/20 to-success/5" },
-    medium: { label: "同等", color: "bg-primary/10 text-primary border-primary/30", gradient: "from-primary/20 to-primary/5" },
-    hard: { label: "提升", color: "bg-warning/10 text-warning border-warning/30", gradient: "from-warning/20 to-warning/5" },
+    easy: { label: "基础", color: "bg-success/10 text-success border-success/20" },
+    medium: { label: "同等", color: "bg-primary/10 text-primary border-primary/20" },
+    hard: { label: "提升", color: "bg-warning/10 text-warning border-warning/20" },
   };
 
   const config = difficultyConfig[question.difficulty];
 
   return (
-    <div className={cn(
-      "p-5 rounded-xl border border-border/50 bg-gradient-to-br transition-all duration-300 hover:shadow-card",
-      config.gradient
-    )}>
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-sm font-medium text-foreground flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-muted text-xs font-bold">
-            {index + 1}
-          </span>
-          练习题
-        </span>
-        <span className={cn("px-3 py-1 rounded-full text-xs font-semibold border", config.color)}>
+    <div className="p-4 rounded-lg border border-border bg-card">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-sm font-medium text-muted-foreground">练习 {index + 1}</span>
+        <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium border", config.color)}>
           {config.label}
         </span>
       </div>
-      <p className="text-sm text-foreground mb-5 leading-relaxed">{question.content}</p>
+      <p className="text-sm text-foreground mb-4">{question.content}</p>
       
-      <div className="space-y-4">
-        <div className="relative group">
-          <textarea
-            value={userAnswer}
-            onChange={(e) => setUserAnswer(e.target.value)}
-            placeholder="在这里写下你的答案..."
-            className="w-full p-4 text-sm rounded-xl border border-border/50 bg-background/80 backdrop-blur-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all duration-300"
-            rows={3}
-          />
-        </div>
-        <div className="flex gap-3">
+      <div className="space-y-3">
+        <textarea
+          value={userAnswer}
+          onChange={(e) => setUserAnswer(e.target.value)}
+          placeholder="在这里写下你的答案..."
+          className="w-full p-3 text-sm rounded-lg border border-input bg-background resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          rows={2}
+        />
+        <div className="flex gap-2">
           <Button
-            variant={showAnswer ? "secondary" : "outline"}
+            variant="secondary"
             size="sm"
             onClick={() => setShowAnswer(!showAnswer)}
-            className="rounded-lg"
           >
             {showAnswer ? "隐藏答案" : "查看答案"}
           </Button>
         </div>
         {showAnswer && (
-          <div className="p-4 rounded-xl bg-success/10 border border-success/20 animate-scale-in">
-            <p className="text-xs font-semibold text-success mb-2 flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              参考答案
-            </p>
-            <p className="text-sm text-foreground leading-relaxed">{question.answer}</p>
+          <div className="p-3 rounded-lg bg-success/5 border border-success/20 animate-scale-in">
+            <p className="text-xs font-medium text-success mb-1">参考答案：</p>
+            <p className="text-sm text-foreground">{question.answer}</p>
           </div>
         )}
       </div>
