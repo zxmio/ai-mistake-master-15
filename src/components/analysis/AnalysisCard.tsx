@@ -6,7 +6,10 @@ import {
   ListChecks,
   ChevronDown,
   ChevronUp,
-  Lightbulb
+  Lightbulb,
+  ImageIcon,
+  Download,
+  Sparkles
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +23,7 @@ interface AnalysisCardProps {
 
 export function AnalysisCard({ analysis, originalQuestion }: AnalysisCardProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    card: true,
     cause: true,
     answer: true,
     knowledge: false,
@@ -30,8 +34,71 @@ export function AnalysisCard({ analysis, originalQuestion }: AnalysisCardProps) 
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const handleDownloadCard = () => {
+    if (analysis.knowledgeCardUrl) {
+      const link = document.createElement('a');
+      link.href = analysis.knowledgeCardUrl;
+      link.download = `knowledge-card-${Date.now()}.png`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <div className="space-y-4 animate-fade-in">
+      {/* AI Generated Knowledge Card */}
+      {analysis.knowledgeCardUrl && (
+        <Card className="border-primary/30 shadow-glow overflow-hidden">
+          <CardHeader 
+            className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors rounded-t-lg bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10"
+            onClick={() => toggleSection('card')}
+          >
+            <CardTitle className="flex items-center justify-between text-base">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary to-accent">
+                  <Sparkles className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-semibold">
+                  AI 知识卡片
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownloadCard();
+                  }}
+                  className="h-8 px-2"
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  保存
+                </Button>
+                {expandedSections.card ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </div>
+            </CardTitle>
+          </CardHeader>
+          {expandedSections.card && (
+            <CardContent className="p-4 animate-slide-up">
+              <div className="relative rounded-xl overflow-hidden shadow-card">
+                <img 
+                  src={analysis.knowledgeCardUrl} 
+                  alt="AI 生成的知识点卡片"
+                  className="w-full h-auto object-contain max-h-[500px] bg-muted"
+                />
+                <div className="absolute bottom-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-background/80 backdrop-blur-sm text-xs text-muted-foreground">
+                  <Sparkles className="h-3 w-3" />
+                  AI 生成
+                </div>
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      )}
+
       {/* Original Question */}
       <Card className="border-border/50 shadow-md">
         <CardHeader className="pb-3">

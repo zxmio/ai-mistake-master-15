@@ -12,6 +12,7 @@ export interface QuestionAnalysis {
   correctAnswer: string;
   knowledgePoints: KnowledgePoint[];
   similarQuestions: SimilarQuestion[];
+  knowledgeCardUrl?: string;
 }
 
 export interface KnowledgePoint {

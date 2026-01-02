@@ -88,6 +88,31 @@ export function useQuestions() {
         })),
       };
 
+      // Generate knowledge card image using Gemini 3 Pro Image
+      let knowledgeCardUrl: string | undefined;
+      try {
+        toast.info('正在生成知识卡片图片...');
+        const { data: cardResult, error: cardError } = await supabase.functions.invoke('generate-knowledge-card', {
+          body: {
+            subject: data.subject,
+            originalQuestion: data.text || '图片题目',
+            knowledgePoints: analysis.knowledgePoints,
+            cause: analysis.cause,
+          }
+        });
+
+        if (!cardError && cardResult?.imageUrl) {
+          knowledgeCardUrl = cardResult.imageUrl;
+          analysis.knowledgeCardUrl = knowledgeCardUrl;
+          console.log('Knowledge card generated:', knowledgeCardUrl);
+        } else {
+          console.error('Knowledge card generation failed:', cardError);
+        }
+      } catch (cardGenError) {
+        console.error('Knowledge card generation error:', cardGenError);
+        // Continue without the card - it's not critical
+      }
+
       // Save to database
       const { data: questionData, error: insertError } = await supabase
         .from('wrong_questions')
