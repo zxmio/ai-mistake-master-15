@@ -120,12 +120,12 @@ export default function Questions() {
 
         {/* Question List */}
         {filteredQuestions.length > 0 ? (
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredQuestions.map((question, index) => (
               <div 
                 key={question.id}
-                className="animate-slide-up"
-                style={{ animationDelay: `${index * 50}ms` }}
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 30}ms` }}
               >
                 <QuestionCard 
                   question={question} 
