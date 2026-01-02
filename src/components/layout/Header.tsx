@@ -1,8 +1,9 @@
-import { Brain, Menu, X } from "lucide-react";
+import { Brain, Menu, X, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { label: "首页", path: "/" },
@@ -14,6 +15,13 @@ const navItems = [
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-lg">
@@ -42,6 +50,26 @@ export function Header() {
             </Link>
           ))}
         </nav>
+
+        {/* Auth Buttons */}
+        <div className="hidden md:flex items-center gap-2">
+          {user ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground flex items-center gap-1">
+                <User className="w-4 h-4" />
+                {user.email?.split('@')[0]}
+              </span>
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4 mr-1" />
+                退出
+              </Button>
+            </div>
+          ) : (
+            <Button asChild size="sm">
+              <Link to="/auth">登录 / 注册</Link>
+            </Button>
+          )}
+        </div>
 
         {/* Mobile Menu Button */}
         <Button
@@ -73,6 +101,22 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+            <div className="border-t border-border/50 mt-2 pt-2">
+              {user ? (
+                <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  退出登录
+                </Button>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="px-4 py-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground block text-center"
+                >
+                  登录 / 注册
+                </Link>
+              )}
+            </div>
           </div>
         </nav>
       )}
