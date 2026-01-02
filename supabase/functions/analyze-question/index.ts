@@ -136,11 +136,22 @@ serve(async (req) => {
     // Parse the JSON response
     let analysis;
     try {
-      // Remove markdown code blocks if present
-      const cleanedText = analysisText.replace(/```json\n?|\n?```/g, '').trim();
+      // Remove markdown code blocks if present - handle multiple formats
+      let cleanedText = analysisText.trim();
+      
+      // Handle ```json ... ``` format
+      if (cleanedText.startsWith('```')) {
+        // Remove opening ``` or ```json
+        cleanedText = cleanedText.replace(/^```(?:json)?\s*\n?/, '');
+        // Remove closing ```
+        cleanedText = cleanedText.replace(/\n?```\s*$/, '');
+      }
+      
+      cleanedText = cleanedText.trim();
       analysis = JSON.parse(cleanedText);
     } catch (parseError) {
       console.error('Failed to parse AI response:', analysisText);
+      console.error('Parse error:', parseError);
       return new Response(
         JSON.stringify({ error: '解析AI响应失败', rawResponse: analysisText }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
