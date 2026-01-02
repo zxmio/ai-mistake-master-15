@@ -2,8 +2,7 @@ import { useState } from "react";
 import { ChevronRight, Trash2, Eye, Calendar, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { WrongQuestion } from "@/types";
+import { WrongQuestion, getSubjectLabel } from "@/types";
 import { AnalysisCard } from "@/components/analysis/AnalysisCard";
 import {
   Dialog,
@@ -34,7 +33,7 @@ export function QuestionCard({ question, onDelete }: QuestionCardProps) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                  {question.subject}
+                  {getSubjectLabel(question.subject)}
                 </span>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Calendar className="h-3 w-3" />

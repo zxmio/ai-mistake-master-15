@@ -2,7 +2,7 @@ export interface WrongQuestion {
   id: string;
   content: string;
   imageUrl?: string;
-  subject: string;
+  subject: Subject;
   createdAt: Date;
   analysis?: QuestionAnalysis;
 }
@@ -39,17 +39,31 @@ export interface FlashCard {
   difficulty: number;
 }
 
+// Match database enum
 export type Subject = 
-  | '数学' 
-  | '语文' 
-  | '英语' 
-  | '物理' 
-  | '化学' 
-  | '生物' 
-  | '历史' 
-  | '地理' 
-  | '政治';
+  | 'math' 
+  | 'physics' 
+  | 'chemistry' 
+  | 'biology' 
+  | 'chinese' 
+  | 'english' 
+  | 'history' 
+  | 'geography' 
+  | 'politics';
 
-export const SUBJECTS: Subject[] = [
-  '数学', '语文', '英语', '物理', '化学', '生物', '历史', '地理', '政治'
+export const SUBJECTS: { value: Subject; label: string }[] = [
+  { value: 'math', label: '数学' },
+  { value: 'chinese', label: '语文' },
+  { value: 'english', label: '英语' },
+  { value: 'physics', label: '物理' },
+  { value: 'chemistry', label: '化学' },
+  { value: 'biology', label: '生物' },
+  { value: 'history', label: '历史' },
+  { value: 'geography', label: '地理' },
+  { value: 'politics', label: '政治' },
 ];
+
+export const getSubjectLabel = (value: Subject): string => {
+  const subject = SUBJECTS.find(s => s.value === value);
+  return subject?.label || value;
+};
