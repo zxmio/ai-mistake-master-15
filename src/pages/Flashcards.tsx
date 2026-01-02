@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { FlashcardViewer } from "@/components/flashcard/FlashcardViewer";
 import { useQuestions } from "@/hooks/useQuestions";
@@ -7,7 +8,11 @@ import { Upload, Brain, Clock, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Flashcards() {
-  const { flashcards, updateFlashcardDifficulty } = useQuestions();
+  const { flashcards, loadFlashcards, updateFlashcardDifficulty } = useQuestions();
+
+  useEffect(() => {
+    loadFlashcards();
+  }, [loadFlashcards]);
 
   const stats = [
     { 
