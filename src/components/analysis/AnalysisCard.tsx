@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { LatexRenderer } from "@/components/ui/latex-renderer";
 import { cn } from "@/lib/utils";
 import { QuestionAnalysis, SimilarQuestion } from "@/types";
 
@@ -65,7 +66,9 @@ export function AnalysisCard({ analysis, originalQuestion }: AnalysisCardProps) 
         </CardHeader>
         {expandedSections.cause && (
           <CardContent className="animate-slide-up">
-            <p className="text-sm text-foreground leading-relaxed">{analysis.cause}</p>
+            <div className="text-sm text-foreground leading-relaxed">
+              <LatexRenderer content={analysis.cause} />
+            </div>
           </CardContent>
         )}
       </Card>
@@ -88,7 +91,9 @@ export function AnalysisCard({ analysis, originalQuestion }: AnalysisCardProps) 
         </CardHeader>
         {expandedSections.answer && (
           <CardContent className="animate-slide-up">
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{analysis.correctAnswer}</p>
+            <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+              <LatexRenderer content={analysis.correctAnswer} />
+            </div>
           </CardContent>
         )}
       </Card>
@@ -115,14 +120,18 @@ export function AnalysisCard({ analysis, originalQuestion }: AnalysisCardProps) 
               <div key={index} className="p-4 rounded-lg bg-muted/50">
                 <div className="flex items-center gap-2 mb-2">
                   <Lightbulb className="h-4 w-4 text-warning" />
-                  <h4 className="font-medium text-foreground">{point.title}</h4>
+                  <h4 className="font-medium text-foreground"><LatexRenderer content={point.title} /></h4>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{point.explanation}</p>
+                <div className="text-sm text-muted-foreground leading-relaxed">
+                  <LatexRenderer content={point.explanation} />
+                </div>
                 {point.examples && point.examples.length > 0 && (
                   <div className="mt-3 pl-4 border-l-2 border-primary/30">
                     <p className="text-xs font-medium text-primary mb-1">例子：</p>
                     {point.examples.map((example, i) => (
-                      <p key={i} className="text-sm text-muted-foreground">{example}</p>
+                      <div key={i} className="text-sm text-muted-foreground">
+                        <LatexRenderer content={example} />
+                      </div>
                     ))}
                   </div>
                 )}
@@ -180,7 +189,7 @@ function PracticeQuestion({ question, index }: { question: SimilarQuestion; inde
           {config.label}
         </span>
       </div>
-      <p className="text-sm text-foreground mb-4">{question.content}</p>
+      <div className="text-sm text-foreground mb-4"><LatexRenderer content={question.content} /></div>
       
       <div className="space-y-3">
         <textarea
@@ -202,7 +211,7 @@ function PracticeQuestion({ question, index }: { question: SimilarQuestion; inde
         {showAnswer && (
           <div className="p-3 rounded-lg bg-success/5 border border-success/20 animate-scale-in">
             <p className="text-xs font-medium text-success mb-1">参考答案：</p>
-            <p className="text-sm text-foreground">{question.answer}</p>
+            <div className="text-sm text-foreground"><LatexRenderer content={question.answer} /></div>
           </div>
         )}
       </div>
