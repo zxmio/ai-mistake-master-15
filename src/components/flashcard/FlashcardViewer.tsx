@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RotateCcw, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, SkipForward } from "lucide-react";
+import { RotateCcw, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, SkipForward, Sparkles, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FlashCard } from "@/types";
@@ -16,12 +16,17 @@ export function FlashcardViewer({ cards, onComplete }: FlashcardViewerProps) {
 
   if (cards.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="p-4 rounded-full bg-muted mb-4">
-          <RotateCcw className="h-8 w-8 text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="relative">
+          <div className="absolute inset-0 gradient-primary rounded-full blur-2xl opacity-20 animate-pulse-soft" />
+          <div className="relative p-6 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 mb-6">
+            <Brain className="h-12 w-12 text-primary" />
+          </div>
         </div>
-        <h3 className="text-lg font-medium text-foreground mb-2">暂无复习卡片</h3>
-        <p className="text-sm text-muted-foreground">上传错题后将自动生成复习卡片</p>
+        <h3 className="text-xl font-semibold text-foreground mb-2">暂无复习卡片</h3>
+        <p className="text-sm text-muted-foreground max-w-xs">
+          上传错题后将自动生成智能复习卡片，帮助你高效记忆
+        </p>
       </div>
     );
   }
@@ -50,31 +55,36 @@ export function FlashcardViewer({ cards, onComplete }: FlashcardViewerProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Progress */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">复习进度</span>
-          <span className="font-medium text-foreground">
+      <div className="space-y-3">
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-muted-foreground flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            复习进度
+          </span>
+          <span className="font-semibold text-foreground px-3 py-1 rounded-full bg-primary/10">
             {currentIndex + 1} / {cards.length}
           </span>
         </div>
-        <div className="h-2 rounded-full bg-muted overflow-hidden">
+        <div className="h-3 rounded-full bg-muted/50 overflow-hidden shadow-inner">
           <div 
-            className="h-full gradient-primary transition-all duration-300"
+            className="h-full gradient-primary transition-all duration-500 ease-out rounded-full relative"
             style={{ width: `${progress}%` }}
-          />
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+          </div>
         </div>
       </div>
 
       {/* Flashcard */}
       <div 
-        className="perspective-1000 cursor-pointer"
+        className="perspective-1000 cursor-pointer group"
         onClick={() => setIsFlipped(!isFlipped)}
       >
         <div 
           className={cn(
-            "relative w-full min-h-[300px] transition-transform duration-500 transform-style-3d",
+            "relative w-full min-h-[320px] transition-transform duration-700 ease-out",
             isFlipped && "rotate-y-180"
           )}
           style={{
@@ -84,83 +94,101 @@ export function FlashcardViewer({ cards, onComplete }: FlashcardViewerProps) {
         >
           {/* Front */}
           <div 
-            className="absolute inset-0 backface-hidden rounded-2xl border border-border bg-card p-8 shadow-lg flex flex-col justify-center items-center text-center"
+            className="absolute inset-0 rounded-3xl border border-border/50 bg-card/90 backdrop-blur-sm p-8 shadow-card flex flex-col justify-center items-center text-center group-hover:shadow-float transition-shadow duration-300"
             style={{ backfaceVisibility: 'hidden' }}
           >
-            <span className="text-xs font-medium text-primary mb-4 px-3 py-1 rounded-full bg-primary/10">
-              点击翻转查看答案
-            </span>
-            <p className="text-lg text-foreground leading-relaxed">{currentCard.front}</p>
+            <div className="absolute top-0 left-0 right-0 h-1.5 gradient-primary rounded-t-3xl" />
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary px-4 py-2 rounded-full bg-primary/10 border border-primary/20 shadow-glow">
+                <RotateCcw className="h-3.5 w-3.5" />
+                点击翻转
+              </span>
+            </div>
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 mb-6">
+              <Brain className="h-8 w-8 text-primary" />
+            </div>
+            <p className="text-lg font-medium text-foreground leading-relaxed max-w-md">{currentCard.front}</p>
           </div>
 
           {/* Back */}
           <div 
-            className="absolute inset-0 backface-hidden rounded-2xl border border-success/30 bg-success/5 p-8 shadow-lg flex flex-col justify-center items-center text-center"
+            className="absolute inset-0 rounded-3xl border border-success/30 bg-gradient-to-br from-success/5 to-success/10 backdrop-blur-sm p-8 shadow-card flex flex-col justify-center items-center text-center"
             style={{ 
               backfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)',
             }}
           >
-            <span className="text-xs font-medium text-success mb-4 px-3 py-1 rounded-full bg-success/10">
-              答案
-            </span>
-            <p className="text-lg text-foreground leading-relaxed">{currentCard.back}</p>
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-success to-success/50 rounded-t-3xl" />
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-success px-4 py-2 rounded-full bg-success/10 border border-success/20">
+                ✓ 答案
+              </span>
+            </div>
+            <div className="p-3 rounded-2xl bg-success/10 mb-6">
+              <Sparkles className="h-8 w-8 text-success" />
+            </div>
+            <p className="text-lg font-medium text-foreground leading-relaxed max-w-md">{currentCard.back}</p>
           </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex items-center justify-between">
+      {/* Navigation & Actions */}
+      <div className="flex items-center justify-between gap-4">
         <Button
           variant="outline"
-          size="icon"
+          size="lg"
           onClick={handlePrev}
           disabled={currentIndex === 0}
+          className="rounded-xl border-border/50 hover:bg-muted/50 hover:border-primary/30 transition-all duration-300"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-5 w-5" />
         </Button>
 
         {isFlipped ? (
-          <div className="flex gap-2">
+          <div className="flex gap-3 flex-1 justify-center">
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               onClick={() => handleDifficultySelect('hard')}
-              className="border-destructive/30 text-destructive hover:bg-destructive/10"
+              className="rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 flex-1 max-w-[120px] transition-all duration-300"
             >
-              <ThumbsDown className="h-4 w-4 mr-1" />
+              <ThumbsDown className="h-4 w-4 mr-1.5" />
               再练练
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               onClick={() => handleDifficultySelect('medium')}
-              className="border-warning/30 text-warning hover:bg-warning/10"
+              className="rounded-xl border-warning/30 text-warning hover:bg-warning/10 hover:border-warning/50 flex-1 max-w-[120px] transition-all duration-300"
             >
-              <SkipForward className="h-4 w-4 mr-1" />
+              <SkipForward className="h-4 w-4 mr-1.5" />
               还行
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               onClick={() => handleDifficultySelect('easy')}
-              className="border-success/30 text-success hover:bg-success/10"
+              className="rounded-xl border-success/30 text-success hover:bg-success/10 hover:border-success/50 flex-1 max-w-[120px] transition-all duration-300"
             >
-              <ThumbsUp className="h-4 w-4 mr-1" />
+              <ThumbsUp className="h-4 w-4 mr-1.5" />
               已掌握
             </Button>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">点击卡片翻转</p>
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            <RotateCcw className="h-4 w-4" />
+            点击卡片翻转查看答案
+          </p>
         )}
 
         <Button
           variant="outline"
-          size="icon"
+          size="lg"
           onClick={handleNext}
           disabled={currentIndex === cards.length - 1}
+          className="rounded-xl border-border/50 hover:bg-muted/50 hover:border-primary/30 transition-all duration-300"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-5 w-5" />
         </Button>
       </div>
     </div>
