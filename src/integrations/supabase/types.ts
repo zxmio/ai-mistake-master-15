@@ -14,7 +14,145 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      flashcards: {
+        Row: {
+          back: string
+          created_at: string
+          difficulty: string | null
+          front: string
+          id: string
+          last_reviewed: string | null
+          question_id: string
+          review_count: number | null
+          user_id: string
+        }
+        Insert: {
+          back: string
+          created_at?: string
+          difficulty?: string | null
+          front: string
+          id?: string
+          last_reviewed?: string | null
+          question_id: string
+          review_count?: number | null
+          user_id: string
+        }
+        Update: {
+          back?: string
+          created_at?: string
+          difficulty?: string | null
+          front?: string
+          id?: string
+          last_reviewed?: string | null
+          question_id?: string
+          review_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcards_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "wrong_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      question_analysis: {
+        Row: {
+          cause: string
+          correct_answer: string
+          created_at: string
+          id: string
+          knowledge_points: Json
+          question_id: string
+          similar_questions: Json
+        }
+        Insert: {
+          cause: string
+          correct_answer: string
+          created_at?: string
+          id?: string
+          knowledge_points?: Json
+          question_id: string
+          similar_questions?: Json
+        }
+        Update: {
+          cause?: string
+          correct_answer?: string
+          created_at?: string
+          id?: string
+          knowledge_points?: Json
+          question_id?: string
+          similar_questions?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_analysis_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: true
+            referencedRelation: "wrong_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wrong_questions: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          image_urls: string[] | null
+          subject: Database["public"]["Enums"]["subject_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          image_urls?: string[] | null
+          subject: Database["public"]["Enums"]["subject_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_urls?: string[] | null
+          subject?: Database["public"]["Enums"]["subject_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +161,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      subject_type:
+        | "math"
+        | "physics"
+        | "chemistry"
+        | "biology"
+        | "chinese"
+        | "english"
+        | "history"
+        | "geography"
+        | "politics"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +297,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      subject_type: [
+        "math",
+        "physics",
+        "chemistry",
+        "biology",
+        "chinese",
+        "english",
+        "history",
+        "geography",
+        "politics",
+      ],
+    },
   },
 } as const

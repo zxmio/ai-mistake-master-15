@@ -1,1 +1,4 @@
 project_id = "dzoqymcjqwrvnakstlmm"
+
+[functions.analyze-question]
+verify_jwt = true
