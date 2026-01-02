@@ -14,7 +14,7 @@ export function UploadArea({ onSubmit, isLoading }: UploadAreaProps) {
   const [text, setText] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [subject, setSubject] = useState<Subject>("数学");
+  const [subject, setSubject] = useState<Subject>("math");
   const [isDragging, setIsDragging] = useState(false);
 
   const handleImageUpload = useCallback((files: FileList | null) => {
@@ -61,16 +61,16 @@ export function UploadArea({ onSubmit, isLoading }: UploadAreaProps) {
         <div className="flex flex-wrap gap-2">
           {SUBJECTS.map((s) => (
             <button
-              key={s}
-              onClick={() => setSubject(s)}
+              key={s.value}
+              onClick={() => setSubject(s.value)}
               className={cn(
                 "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                subject === s
+                subject === s.value
                   ? "gradient-primary text-primary-foreground shadow-glow"
                   : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
               )}
             >
-              {s}
+              {s.label}
             </button>
           ))}
         </div>
