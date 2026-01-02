@@ -59,11 +59,30 @@ serve(async (req) => {
 2. 知识点讲解要生动形象，适合学生理解
 3. 只返回JSON，不要有其他内容`;
 
-    const userMessage = imageUrls && imageUrls.length > 0
-      ? `学科：${subject}\n题目内容：${content || '请查看图片'}\n图片链接：${imageUrls.join(', ')}`
-      : `学科：${subject}\n题目内容：${content}`;
+    // Build user message with multimodal support for images
+    let userMessageContent: any;
+    
+    if (imageUrls && imageUrls.length > 0) {
+      // Use multimodal format for vision capability
+      const textContent = `学科：${subject}\n题目内容：${content || '请仔细查看图片中的题目内容，分析学生的错误并提供详细指导。'}`;
+      
+      userMessageContent = [
+        { type: 'text', text: textContent },
+        ...imageUrls.map((url: string) => ({
+          type: 'image_url',
+          image_url: { url }
+        }))
+      ];
+    } else {
+      userMessageContent = `学科：${subject}\n题目内容：${content}`;
+    }
 
-    console.log('Analyzing question:', { subject, contentLength: content?.length, imageCount: imageUrls?.length });
+    console.log('Analyzing question:', { 
+      subject, 
+      contentLength: content?.length, 
+      imageCount: imageUrls?.length,
+      hasImages: imageUrls && imageUrls.length > 0
+    });
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -75,7 +94,7 @@ serve(async (req) => {
         model: 'google/gemini-3-pro-preview',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: userMessage }
+          { role: 'user', content: userMessageContent }
         ],
       }),
     });
